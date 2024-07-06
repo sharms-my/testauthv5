@@ -4,14 +4,14 @@ import { Adapter } from "next-auth/adapters";
 import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import Resend from "next-auth/providers/resend";
-import prisma from "./lib/prisma";
+import { db } from "./lib/db";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   theme: {
     logo: "/logo.png",
   },
-  adapter: PrismaAdapter(prisma) as Adapter,
+  adapter: PrismaAdapter(db) as Adapter,
   callbacks: {
     session({ session, user }) {
       session.user.role = user.role;
@@ -20,7 +20,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   providers: [
     Google,
-    GitHub,
     Resend({
       from: "no-reply@tutorial.codinginflow.com",
     }),

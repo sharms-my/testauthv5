@@ -1,4 +1,4 @@
-import prisma from "@/lib/prisma";
+import { db } from "@/lib/db";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { cache } from "react";
@@ -8,17 +8,17 @@ interface PageProps {
 }
 
 const getUser = cache(async (id: string) => {
-  return prisma.user.findUnique({
+  return db.user.findUnique({
     where: { id },
     select: { id: true, name: true, image: true, createdAt: true },
   });
 });
 
-export async function generateStaticParams() {
-  const allUsers = await prisma.user.findMany();
+// export async function generateStaticParams() {
+//   const allUsers = await db.user.findFirstOrThrow();
 
-  return allUsers.map(({ id }) => ({ id }));
-}
+//   return allUsers.map(({ id }) => ({ id }));
+// }
 
 export async function generateMetadata({ params: { id } }: PageProps) {
   const user = await getUser(id);
