@@ -24,7 +24,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      session.user.id = token.sub;
+      if (token.id) {
+        session.user.id = token.id as string; // Ensure token.id is a string
+      } else {
+        session.user.id = ""; // Fallback value or handle this case explicitly
+      }
       return session;
     },
   },
