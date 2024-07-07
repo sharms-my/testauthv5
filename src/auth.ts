@@ -6,7 +6,6 @@ import Google from "next-auth/providers/google";
 import Resend from "next-auth/providers/resend";
 import { db } from "./lib/db";
 import Credentials from "next-auth/providers/credentials";
-import { compare } from "bcryptjs";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
@@ -48,8 +47,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           },
         });
         console.log("the user is", user);
-        const isMatched = await compare(credentials?.password, user.password);
-        if (isMatched) {
+        //const isMatched = await compare(credentials?.password, user.password);
+        if (user && user.password === credentials?.password) {
           return user;
         } else {
           return null;
