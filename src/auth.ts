@@ -6,6 +6,7 @@ import Google from "next-auth/providers/google";
 import Resend from "next-auth/providers/resend";
 import { db } from "./lib/db";
 import Credentials from "next-auth/providers/credentials";
+import { compare } from "bcryptjs";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
@@ -13,9 +14,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     logo: "/logo.png",
   },
   adapter: PrismaAdapter(db) as Adapter,
+  session: {
+    strategy: "jwt",
+  },
   callbacks: {
-    session({ session, user }) {
-      session.user.role = user.role;
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.user.id = token.id;
       return session;
     },
   },
@@ -27,38 +37,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Credentials({
       name: "Credentials",
       credentials: {
-        email: {
-          label: "Email",
-          type: "email",
-          placeholder: "email@example.com",
-        },
+        username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
-        if (!credentials || !credentials.email || !credentials.password) {
-          return null;
-        }
-
-        const email = credentials.email as string;
-        const password = credentials.password as string;
-
-        let user: any = await db.user.findUnique({
+        // Add your logic to authorize the user
+        const user = await prisma.user.findUnique({
           where: {
-            email,
+            email: credentials?.username,
           },
         });
-
-        if (!user) {
-          user = await db.user.create({
-            data: {
-              email,
-            },
-          });
-        } else {
+        console.log("the user is", user);
+        const isMatched = await compare(credentials?.password, user.password);
+        if (isMatched) {
           return user;
+        } else {
+          return null;
         }
-
-        return user;
       },
     }),
   ],
