@@ -40,14 +40,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Credentials({
       name: "Credentials",
       credentials: {
-        username: { label: "Username", type: "text" },
+        email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
         // Add your logic to authorize the user
-        const user = await prisma.user.findUnique({
+        const email = credentials.email as string;
+        const user = await db.user.findUnique({
           where: {
-            email: credentials?.username,
+            email: email,
           },
         });
         console.log("the user is", user);
