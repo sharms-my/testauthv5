@@ -34,9 +34,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   providers: [
     Google,
-    Resend({
-      from: "no-reply@tutorial.codinginflow.com",
-    }),
     Credentials({
       name: "Credentials",
       credentials: {
